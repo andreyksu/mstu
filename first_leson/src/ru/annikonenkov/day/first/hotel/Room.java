@@ -62,7 +62,12 @@ public class Room {
         return conditioner;
     }
 
-
+    /**
+     * Выполняет резервирование комнаты.
+     *
+     * @param aReservationDate
+     * @return true - если резервирование прошло успешно и на указанную дату нет существующей брони. false - в ином случае.
+     */
     public boolean reserve(ReservationDate aReservationDate) {
         if (!isReservedOnTargetDate(aReservationDate)) {
             reservationDates.add(aReservationDate);
@@ -77,6 +82,12 @@ public class Room {
         }
     }
 
+    /**
+     * Снимает бронь с команты. Бронь снимается только при совпадении дат начала брони и окончания брони.
+     *
+     * @param aReservationDate
+     * @return - true - если бронь снята. false - если бронь не была снята. Не нашли бронь по указанным заданным датам.
+     */
     public boolean release(ReservationDate aReservationDate) {
         Optional<ReservationDate> oReservedDate = getSameReservedDate(aReservationDate);
         if (oReservedDate.isPresent()) {
@@ -92,6 +103,8 @@ public class Room {
 
     /**
      * Выполняет проверку, нет ли брони на указаную дату.
+     *
+     * @return - true - если на указанную дату уже есть бронь. Проверяется на (1. Включение диапазона. 2. Пересечение диапазона). false - в ином случае.
      */
     private boolean isReservedOnTargetDate(ReservationDate aReservationDate) {
         boolean isPresentRange = false;
@@ -118,6 +131,12 @@ public class Room {
         return Optional.empty();
     }
 
+    /**
+     * Возвращает все активные брони от текущей даты и вперед (в будущее).
+     * Необходимо при бронировании, когда хотим понять, в какой период свободна комната.
+     *
+     * @return List<ReservationDate> - список броней для текущей комнаты.
+     */
     public List<ReservationDate> getCurrentAndFutureReservation() {
         LocalDate now = LocalDate.now();
         List<ReservationDate> list = new ArrayList<>();
@@ -125,9 +144,15 @@ public class Room {
             if (reservationDate.isActiveReservationOnFutureDate(now))
                 list.add(reservationDate);
         }
+
         return list;
     }
 
+    /**
+     * Проверяет есть ли активная бронь на текущей день.
+     *
+     * @return - true - если активная бронь на текущей день найдена. false - если брьни нет.
+     */
     public boolean isReservedAtNow() {
         for (ReservationDate rd : reservationDates) {
             if (rd.isActiveReservationAtNow()) {

@@ -13,7 +13,7 @@ public class Hotel {
      * Перечень комнат, что присуще данному отелю.
      */
     //TODO: Если так оставлять, то вероятно лучше сделать через Set - ведь комнаты являеются уникальными а не массив.
-    //TODO: В этом случае вероятно лучшим случаем будет хранить в Map<Int, Room> и при добавлении из Room брать номер. Так будет быстрее работать.
+    //TODO: В этом случае вероятно лучшим случаем будет хранить в Map<Int, Room> и при добавлении из Room брать номер. Так будет быстрее работать, чем каждый раз перебирать.
     private Room[] rooms;
 
     /**
@@ -26,6 +26,12 @@ public class Hotel {
         rooms = aRooms;
     }
 
+    /**
+     * Возвращает комнату по её номеру.
+     *
+     * @param aRoomNumber
+     * @return Optional<Room> - комната обёрнутая в Optional если такая комната найдена. Иначе пустой Optional.
+     */
     private Optional<Room> getRoomByNumber(int aRoomNumber) {
         for (Room room : rooms) {
             if (room.getNumbers() == aRoomNumber) {
@@ -37,7 +43,7 @@ public class Hotel {
     }
 
     /**
-     * Выполняет резервирование целевой комнаты на целевую дату.
+     * Выполняет резервирование целевой комнаты на целевую дату. Если есть пересечение по датам с уже существующей бронью, то бронь выполнена не будет.
      *
      * @param aRoomNumber  - номер целевой комнаты.
      * @param aReserveDate - диапазон дат для резеровирования.
@@ -61,11 +67,11 @@ public class Hotel {
     }
 
     /**
-     * Выполняет отмену брони. Отмена выполняется только при совпадении дат брони - как бы защита от снятия случайной брони.
+     * Выполняет отмену брони. Отмена выполняется только при совпадении дат брони - как бы защита от случайного снятия брони.
      *
      * @param aRoomNumber
      * @param aReserveDate
-     * @return
+     * @return - true - если бронь снята. false - в ином случае (если комната не найдена в списке или если не нашли бронь с заданными границами).
      */
     public boolean releaseTargetRoom(int aRoomNumber, ReservationDate aReserveDate) {
         Optional<Room> roomOptional = getRoomByNumber(aRoomNumber);
@@ -84,10 +90,16 @@ public class Hotel {
         return releaseResult;
     }
 
+    /**
+     * Возвращает комнаты, что на текущий день доступны (не забронированы).
+     * Приведение к масиву осуществляется из за ограничения, т.к. на данном этапе еще не проходили Collections.
+     *
+     * @return
+     */
     public Room[] getFreeRoomAtNow() {
         List<Room> roomList = new ArrayList<>();
         for (Room room : rooms) {
-            if (room.isReservedAtNow()) {//TODO: Добавить метод для вывода свободных номеров на сейчас.
+            if (room.isReservedAtNow()) {
                 continue;
             } else {
                 roomList.add(room);
@@ -97,13 +109,27 @@ public class Hotel {
         for (int i = 0; i < roomList.size(); i++) {
             freeRoomArray[i] = roomList.get(i);
         }
-        System.out.println("The List Free Rooms: ");
+        System.out.println("Список свободных комнат в отеле: ");
         printRoomsList(freeRoomArray);
         return freeRoomArray;
     }
+    //TODO: Добавить метод, что будет возвращать список СВОБОДНЫДХ комнат на заданный диапазон (а не только на текущий день). По сути - это будет общий метод для getFreeRoomAtNow().
+
+    public void printActiveReservationForTargetRoom(int aRoomNumber) {
+        Optional<Room> roomOptional = getRoomByNumber(aRoomNumber);
+        if (!roomOptional.isPresent()) {
+            return;
+        }
+        var room = roomOptional.get();
+        List<ReservationDate> reservationList = room.getCurrentAndFutureReservation();
+        reservationList.stream().forEach(item -> System.out.println(item));
+        if (reservationList.size() == 0)
+            System.out.println("Для заданной комнаты не активных броней.");
+    }
+
 
     public Room[] getFullListOfRooms() {
-        System.out.println("The Full list of Rooms: ");
+        System.out.println("Полный список комнат для отеля: ");
         printRoomsList(rooms);
         return rooms;
     }
@@ -115,6 +141,6 @@ public class Hotel {
     }
 
     public String toString() {
-        return String.format("Отель = %s содержит %s комнат!", hotelName, rooms.length);
+        return String.format("Отель = %s содержит следующее количество %s комнат!", hotelName, rooms.length);
     }
 }
