@@ -2,9 +2,6 @@ package ru.annikonenkov.day.first.hotel;
 
 import java.time.LocalDate;
 
-/**
- * Пока не используется. Идея была бронировать на заданные даты с проверокой при бронировании - не забранорово ли на заданную дату.
- */
 public class ReservationDate {
 
     private LocalDate startDateReserve;
@@ -15,7 +12,7 @@ public class ReservationDate {
      */
     private boolean isActiveReservation = false;
 
-    public ReservationDate(LocalDate aStartReserve, LocalDate aEndReserve) {//TODO: Добавить проверку, что первая дата, меньше даты окончания. Хотя можно менять их местами.
+    public ReservationDate(LocalDate aStartReserve, LocalDate aEndReserve) {//TODO: Добавить проверку, что первая дата, меньше даты окончания. Можно менять их местами.
         startDateReserve = aStartReserve;
         endDateReserve = aEndReserve;
     }
@@ -33,7 +30,7 @@ public class ReservationDate {
     }
 
     /**
-     * Проверяет, есть ли пересечение по диапазону дат с уже имеющейся бронью.
+     * Проверяет, есть ли пересечение по диапазону дат с другой бронью.
      *
      * @return - true - если на указанаую дату уже существует активная бронь. false - если брони нет, либо бронь снята.
      */

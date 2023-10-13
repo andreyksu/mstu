@@ -9,11 +9,11 @@ import java.util.Optional;
  */
 public class Hotel {
 
+    //TODO: Если так оставлять, то вероятно лучше сделать через Set - ведь комнаты являются уникальными а не массив.
+    //TODO: В этом случае вероятно лучшим случаем будет хранить в Map<Int, Room> и при добавлении из Room брать номер. Так будет быстрее работать, чем каждый раз перебирать.
     /**
      * Перечень комнат, что присуще данному отелю.
      */
-    //TODO: Если так оставлять, то вероятно лучше сделать через Set - ведь комнаты являеются уникальными а не массив.
-    //TODO: В этом случае вероятно лучшим случаем будет хранить в Map<Int, Room> и при добавлении из Room брать номер. Так будет быстрее работать, чем каждый раз перебирать.
     private Room[] rooms;
 
     /**
@@ -47,7 +47,7 @@ public class Hotel {
      *
      * @param aRoomNumber  - номер целевой комнаты.
      * @param aReserveDate - диапазон дат для резеровирования.
-     * @return - true - Если комнату удалась успешно зарезервировать. false - в ином случае.
+     * @return true - Если комнату удалась успешно зарезервировать. false - в ином случае.
      */
     public boolean reserveTargetRoom(int aRoomNumber, ReservationDate aReserveDate) {
         Optional<Room> roomOptional = getRoomByNumber(aRoomNumber);
@@ -92,7 +92,7 @@ public class Hotel {
 
     /**
      * Возвращает комнаты, что на текущий день доступны (не забронированы).
-     * Приведение к масиву осуществляется из за ограничения, т.к. на данном этапе еще не проходили Collections.
+     * Приведение к массиву осуществляется из-за ограничения, т.к. на данном этапе(в первый день) еще не проходили Collections :-)
      *
      * @return
      */
@@ -113,8 +113,14 @@ public class Hotel {
         printRoomsList(freeRoomArray);
         return freeRoomArray;
     }
+
     //TODO: Добавить метод, что будет возвращать список СВОБОДНЫДХ комнат на заданный диапазон (а не только на текущий день). По сути - это будет общий метод для getFreeRoomAtNow().
 
+    /**
+     * Возвращает список активных броней для целевой комнаты.
+     *
+     * @param aRoomNumber - номер целевой комнаты.
+     */
     public void printActiveReservationForTargetRoom(int aRoomNumber) {
         Optional<Room> roomOptional = getRoomByNumber(aRoomNumber);
         if (!roomOptional.isPresent()) {
@@ -128,12 +134,22 @@ public class Hotel {
     }
 
 
+    /**
+     * Возвращает полный список комнат, что принадлежит отелю.
+     *
+     * @return
+     */
     public Room[] getFullListOfRooms() {
         System.out.println("Полный список комнат для отеля: ");
         printRoomsList(rooms);
         return rooms;
     }
 
+    /**
+     * Печатает список номеров.
+     *
+     * @param aRooms
+     */
     private void printRoomsList(Room[] aRooms) {
         for (Room room : aRooms) {
             System.out.println(room);

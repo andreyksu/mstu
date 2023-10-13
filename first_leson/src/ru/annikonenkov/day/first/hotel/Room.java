@@ -151,7 +151,7 @@ public class Room {
     /**
      * Проверяет есть ли активная бронь на текущей день.
      *
-     * @return - true - если активная бронь на текущей день найдена. false - если брьни нет.
+     * @return - true - если активная бронь на текущей день найдена. false - если брони нет.
      */
     public boolean isReservedAtNow() {
         for (ReservationDate rd : reservationDates) {

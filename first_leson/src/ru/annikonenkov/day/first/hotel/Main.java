@@ -12,9 +12,14 @@ public class Main {
 
     //TODO: Переделать на Map<String, Command> - Где interface Command будет кроме действия еще иметь описание действия, котрое при ForEach будет отдавать описание для /help.
 
+    /**
+     * Пример работы через список команд.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Map<String, Command> commandsMap = new HashMap<>();//TODO: Вероятно это должно быть в Отеле. Т.к. отель сам знает что он может а что нет.
+        Map<String, Command> commandsMap = new HashMap<>();//TODO: Вероятно это должно быть в Отеле, а не здесь. Т.к. отель сам знает что он может а что нет.
         commandsMap.put(PrintFullRoomsList.KEY, new PrintFullRoomsList());
         commandsMap.put(GetFreeRoomsAtNow.KEY, new GetFreeRoomsAtNow());
         commandsMap.put(DoReserve.KEY, new DoReserve());
@@ -28,10 +33,12 @@ public class Main {
             if (rawStringCommand.equals("/help")) {
                 System.out.println("Доступны следующие команды");
                 System.out.println("---------------------------------------");
-                commandsMap.keySet().stream().forEach(keyItem -> System.out.println(keyItem));
+                commandsMap.keySet().stream().forEach(keyItem -> System.out.print(keyItem + "\t\t\t" + commandsMap.get(keyItem).printCommandDescription() + "\n"));
                 System.out.println("---------------------------------------");
                 System.out.println("Для получения подробной информации по конкретной команде, выберите её и введите ...");
                 continue;
+            } else if (rawStringCommand.equals("/exit")) {
+                break;
             }
             Command command = commandsMap.get(rawStringCommand);
             if (command == null) {
@@ -43,6 +50,12 @@ public class Main {
 
     }
 
+    /**
+     * Первый пример работы через обычный switch-case. Вариант не очень нравится - т.к. непомерно растёт количество команд.
+     * Переименовал main -> main1
+     *
+     * @param args
+     */
     public static void main1(String[] args) {
         Hotel firstHotel = createFirstHotel();
         System.out.println("Вас приветствует сервис бронирования Отеля. Для начала работы введите целевую команду. Или для получения справки введите /help");
@@ -95,6 +108,15 @@ public class Main {
         }
     }
 
+    /**
+     * Метод, что разбирает входные данные в части номера.
+     * - Номер комнаты
+     * - Начальная дата
+     * - Конечная дата.
+     *
+     * @param scanner
+     * @return
+     */
     private static Optional<ComposedObject> parseComposedDate(Scanner scanner) {
         System.out.print("Укажите пожалуйста номер целевой комнаты: ");
         Integer roomNumber = parseRoomAsInt(scanner);
@@ -111,6 +133,12 @@ public class Main {
         return Optional.of(new Main.ComposedObject(roomNumber, startDate.get(), endDate.get()));
     }
 
+    /**
+     * Разбирает входные данные с обработкой исключений в части даты
+     *
+     * @param scanner
+     * @return
+     */
     private static Optional<LocalDate> parsedLocalDate(Scanner scanner) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d/MM/yyyy");
         LocalDate parsedLocalDate;
@@ -130,6 +158,12 @@ public class Main {
         return Optional.of(parsedLocalDate);
     }
 
+    /**
+     * Разбирает данные с обработкой исключения в части номера комнаты.
+     *
+     * @param scanner - входной поток, с которого производится считывание данных.
+     * @return - номер комнаты, или -1 в случае если был отказ от ввода номера.
+     */
     private static Integer parseRoomAsInt(Scanner scanner) {
         Integer roomNumber;
         while (true) {
@@ -206,15 +240,22 @@ public class Main {
     }
 
     interface Command {
-        <T> T execute(Hotel hotel, Scanner scanner);//TODO: Наверное команда не должна ничего возвращать. Иначе в RunTime мы не знаем что будет возращено.
+        void execute(Hotel hotel, Scanner scanner);//TODO: Наверное команда не должна ничего возвращать. Иначе в RunTime мы не знаем что будет возращено (т.к. получаем то мы Command а не реализацию).
+
+        String printCommandDescription();
     }
 
     static class PrintFullRoomsList implements Command {
         public static String KEY = "/getFullRoomsList";
 
         @Override
-        public Room[] execute(Hotel hotel, Scanner scanner) {
-            return hotel.getFullListOfRooms();
+        public void execute(Hotel hotel, Scanner scanner) {
+            hotel.getFullListOfRooms();
+        }
+
+        @Override
+        public String printCommandDescription() {
+            return "Отображает полный список комнат.";
         }
     }
 
@@ -222,8 +263,13 @@ public class Main {
         public static String KEY = "/getFreeRoomsAtNow";
 
         @Override
-        public Room[] execute(Hotel hotel, Scanner scanner) {
-            return hotel.getFreeRoomAtNow();
+        public void execute(Hotel hotel, Scanner scanner) {
+            hotel.getFreeRoomAtNow();
+        }
+
+        @Override
+        public String printCommandDescription() {
+            return "Отображает список свободных комнат на текущий день";
         }
     }
 
@@ -231,14 +277,18 @@ public class Main {
         public static String KEY = "/doReserveTargetRoom";
 
         @Override
-        public Boolean execute(Hotel hotel, Scanner scanner) {
+        public void execute(Hotel hotel, Scanner scanner) {
             System.out.println("Вы выбрали команду для бронирования комнаты.");
             var optionalComposedObj = parseComposedDate(scanner);
             if (optionalComposedObj.isEmpty())
-                return false;
+                return;
             var composedObject = optionalComposedObj.get();
             boolean result = hotel.reserveTargetRoom(composedObject.getNumber(), new ReservationDate(composedObject.getStartDate(), composedObject.getEndDate()));
-            return result;
+        }
+
+        @Override
+        public String printCommandDescription() {
+            return "Выполняет резервирование целевой комнаты. Вводится команда, после чего номер комнаты и даты начала и окончания.";
         }
     }
 
@@ -246,14 +296,18 @@ public class Main {
         public static String KEY = "/doReleaseTargetRoom";
 
         @Override
-        public Boolean execute(Hotel hotel, Scanner scanner) {
+        public void execute(Hotel hotel, Scanner scanner) {
             System.out.println("Вы выбрали команду снятия брони с комнаты.");
             var optionalComposedObjForRelease = parseComposedDate(scanner);
             if (optionalComposedObjForRelease.isEmpty())
-                return false;
+                return;
             var composedObjectToRelease = optionalComposedObjForRelease.get();
             boolean result = hotel.releaseTargetRoom(composedObjectToRelease.getNumber(), new ReservationDate(composedObjectToRelease.getStartDate(), composedObjectToRelease.getEndDate()));
-            return result;
+        }
+
+        @Override
+        public String printCommandDescription() {
+            return "Выполняет снятие брони с целевой комнаты. Вводится команда, после чего номер комнаты и даты начала и окончания брони. При этом дата начала и окончания должны полностью совпадать с текущей активной бронью. Для этого необходимо воспользоваться командой '/getActiveReservationForTargetRoom' ";
         }
     }
 
@@ -261,14 +315,18 @@ public class Main {
         public static String KEY = "/getActiveReservationForTargetRoom";
 
         @Override
-        public Boolean execute(Hotel hotel, Scanner scanner) {
+        public void execute(Hotel hotel, Scanner scanner) {
             System.out.println("Вы выбрали команду для отображения списка активных броней для целевой комнаты.");
             System.out.print("Укажите пожалуйста номер целевой комнаты: ");
             Integer targetNum = parseRoomAsInt(scanner);
             if (targetNum == -1)
-                return null;
+                return;
             hotel.printActiveReservationForTargetRoom(targetNum);
-            return null;
+        }
+
+        @Override
+        public String printCommandDescription() {
+            return "Отображает перечень активных броней для целевой комнаты. Для этого необходимо, ввести команду и указать номер комнаты";
         }
     }
 
