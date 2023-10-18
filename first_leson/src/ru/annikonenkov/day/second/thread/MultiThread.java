@@ -1,5 +1,8 @@
 package ru.annikonenkov.day.second.thread;
 
+/**
+ * Второй день. Три примера запуска потоков.
+ */
 public class MultiThread {
     public static void main(String[] rgs) {
         MyThread mthread1 = new MyThread("Мыть посуду");
@@ -14,7 +17,7 @@ public class MultiThread {
         MyRunnable mr3 = new MyRunnable("Убираться");
         Thread thread = new Thread(mr1);
         Thread thread1 = new Thread(mr2);
-        Thread thread2 = new Thread(mr1);
+        Thread thread2 = new Thread(mr3);
         //thread.start();
         //thread1.start();
         //thread2.start();

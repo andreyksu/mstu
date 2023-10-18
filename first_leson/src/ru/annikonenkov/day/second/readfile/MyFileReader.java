@@ -4,6 +4,9 @@ import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+/**
+ * Второй день. Пример чтение файла.
+ */
 public class MyFileReader {
     public static void main(String[] args) {
         writeStringInFile("String");

@@ -11,6 +11,10 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.Arrays;
 
+
+/**
+ * Второй день. Пример совершения http запроса.
+ */
 public class ProxyReader {
     public static void main(String[] str) {
         checkSocket(null, 0);
@@ -61,7 +65,7 @@ public class ProxyReader {
             InputStream is = urlCon.getInputStream();
             int i = 0;
             while (i != -1) {
-               // i = is.read();
+                // i = is.read();
                 //System.out.println((char) i);
 
             }
